@@ -1,0 +1,13 @@
+# Create links for real TPR
+ATTRS{name}=="Thrustmaster T-Pendular-Rudder", ENV{.INPUT_CLASS}="joysitck", ENV{ID_INPUT_JOYSTICK}="1", ENV{ID_INPUT_ACCELEROMETER}=""
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="Thrustmaster T-Pendular-Rudder", SYMLINK="input/by-path/usb-$env{ID_PATH}-event-$env{.INPUT_CLASS}"
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="Thrustmaster T-Pendular-Rudder", SYMLINK+="input/by-id/usb-$attr{name}-event-$env{.INPUT_CLASS}"
+KERNEL=="js[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="Thrustmaster T-Pendular-Rudder", SYMLINK="input/by-path/usb-$env{ID_PATH}-$env{.INPUT_CLASS}"
+KERNEL=="js[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="Thrustmaster T-Pendular-Rudder", SYMLINK+="input/by-id/usb-$attr{name}-$env{.INPUT_CLASS}"
+
+# Create a by-id link for the virtual TPRs for when service starts
+ATTRS{name}=="T-Pendular-Rudder", ENV{.INPUT_CLASS}="joysitck", ENV{ID_INPUT_JOYSTICK}="1", ENV{ID_INPUT_ACCELEROMETER}=""
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="virtual-T-Pendular-Rudder", SYMLINK="input/by-path/usb-$env{ID_PATH}-event-$env{.INPUT_CLASS}"
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="virtual-T-Pendular-Rudder", SYMLINK+="input/by-id/usb-$attr{name}-event-$env{.INPUT_CLASS}"
+KERNEL=="js[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="virtual-T-Pendular-Rudder", SYMLINK="input/by-path/usb-$env{ID_PATH}-$env{.INPUT_CLASS}"
+KERNEL=="js[0-9]*", SUBSYSTEM=="input", ATTRS{name}=="virtual-T-Pendular-Rudder", SYMLINK+="input/by-id/usb-$attr{name}-$env{.INPUT_CLASS}"
