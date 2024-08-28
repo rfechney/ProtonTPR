@@ -1,3 +1,4 @@
+
 #include <csignal>
 #include <cerrno>
 #include <stdio.h>
@@ -13,34 +14,58 @@ void signalHandler(int dummy) {
     run = false;
 }
 
-int main(void)
-{
-	// Set up signal handler
-	signal(SIGINT, signalHandler);
-	signal(SIGQUIT, signalHandler);
-	signal(SIGABRT, signalHandler);
-	signal(SIGKILL, signalHandler);
+// Function to find the correct Thrustmaster T-Pendular Rudder device path
+const char* findRealTprDevicePath() {
+    static char realTprDevicePath[512];
+    const char* devicePathPattern = "usb-Thrustmaster_T-Pendular-Rudder-event-";
+    char tempDevicePath[512];
+    FILE* fp = popen("ls /dev/input/by-id/ | grep usb-Thrustmaster_T-Pendular-Rudder-event-", "r");
 
-	// Get real TPR device
-	// Open device path
-	const char* realTprDevicePath = "/dev/input/by-id/usb-Thrustmaster_T-Pendular-Rudder-event-joysitck";
-	int realTprFd = open(realTprDevicePath, O_RDONLY|O_NONBLOCK);
-	if (realTprFd < 0)
-	{
-		fprintf(stderr, "Could not open Thrustmaster T-Pendular-Rudder device: %d %s\n", errno, strerror(errno));
-		return -1;
-	}
-	
-	// Get device
-	struct libevdev *realTprDevice;
-	int rc = libevdev_new_from_fd(realTprFd, &realTprDevice);
-	if (rc < 0)
-	{
-		fprintf(stderr, "Could not get Thrustmaster T-Pendular-Rudder device: %d %s\n", -rc, strerror(-rc));
-		close(realTprFd);
-		return -2;
-	}
-	
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to run ls command: %d %s\n", errno, strerror(errno));
+        return NULL;
+    }
+
+    int count = 0;
+    while (fgets(tempDevicePath, sizeof(tempDevicePath)-1, fp) != NULL) {
+        count++;
+        strncpy(realTprDevicePath, tempDevicePath, sizeof(realTprDevicePath) - 1);
+        realTprDevicePath[strcspn(realTprDevicePath, "\n")] = 0; // Remove newline character if present
+    }
+    pclose(fp);
+
+    if (count == 0) {
+        fprintf(stderr, "No Thrustmaster T-Pendular-Rudder devices detected.\n");
+        return NULL;
+    } else if (count > 1) {
+        fprintf(stderr, "Too many Thrustmaster T-Pendular-Rudder devices detected.\n");
+        return NULL;
+    }
+
+    snprintf(realTprDevicePath, sizeof(realTprDevicePath), "/dev/input/by-id/%s", realTprDevicePath);
+    return realTprDevicePath;
+}
+
+int main(void) {
+    // Set up signal handler
+    signal(SIGINT, signalHandler);
+    signal(SIGQUIT, signalHandler);
+    signal(SIGABRT, signalHandler);
+    signal(SIGKILL, signalHandler);
+
+    // Get real TPR device path
+    const char* realTprDevicePath = findRealTprDevicePath();
+    if (realTprDevicePath == NULL) {
+        return -1;
+    }
+
+    // Open device
+    int realTprFd = open(realTprDevicePath, O_RDONLY|O_NONBLOCK);
+    if (realTprFd < 0) {
+        fprintf(stderr, "Could not open Thrustmaster T-Pendular-Rudder device: %d %s\n", errno, strerror(errno));
+        return -1;
+    }
+
 	// Configure virtual TPR
 	// Create device
 	struct libevdev* virtualTprDevice = libevdev_new();
