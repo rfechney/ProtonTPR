@@ -2,6 +2,7 @@
 A small repo that allows the Thrustmaster TPR rudders to work with Elite Dangerous under Steam Proton.
 
 ## Installation
+
 Build:
 ```
 ./make.sh
@@ -18,6 +19,7 @@ sudo ./uninstall.sh
 ```
 
 ## Troubleshooting
+
 If it errors with "Too many Thrustmaster T-Pendular-Rudder devices detected." try the following in a terminal:
 
 ```
