@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Installs ProtonTPR on host
+# Tested on Ubuntu 22.04
+
 # Verify executed as root
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
