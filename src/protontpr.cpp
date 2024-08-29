@@ -48,7 +48,7 @@ int findRealTprDevicePath(/*output*/char* realTprDevicePath) {
 
 		// We have a match, keep it and write it out to the console as logging
 		count++;
-		strncpy(realTprDevicePath, filename, PATH_SIZE);
+		snprintf(realTprDevicePath, PATH_SIZE, "%s/%s", SEARCH_PATH, filename);
 		printf("Found %s\n", filename);
 	}
 
@@ -64,9 +64,8 @@ int findRealTprDevicePath(/*output*/char* realTprDevicePath) {
 		memset(realTprDevicePath, 0, PATH_SIZE);
 		return -3;
 	}
-
-	// Add the search path back into the string
-	snprintf(realTprDevicePath, PATH_SIZE, "%s/%s", SEARCH_PATH, realTprDevicePath);
+	
+	// Success
 	return 0;
 }
 
