@@ -6,4 +6,4 @@ if [ ! -f /usr/include/libevdev-1.0/libevdev/libevdev.h ]; then
 fi
 
 # Build
-g++ -std=c++11 src/protontpr.cpp -I/usr/include/libevdev-1.0 -levdev -o protontpr
+g++ -std=c++17 src/protontpr.cpp -I/usr/include/libevdev-1.0 -levdev -o protontpr

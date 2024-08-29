@@ -1,18 +1,14 @@
-
+#include <filesystem>
 #include <csignal>
-#include <cerrno>
-#include <stdio.h>
-#include <dirent.h>
+#include <iostream>
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
 #include <libevdev/libevdev.h>
 #include <libevdev/libevdev-uinput.h>
 
 // Set up constants for the search algorithm
-#define PATH_SIZE 512
-#define SEARCH_PATH "/dev/input/by-id"
-#define SEARCH_PATTERN "usb-Thrustmaster_T-Pendular-Rudder-event-"
+const std::string SEARCH_PATH = "/dev/input/by-id";
+const std::string SEARCH_PATTERN = "usb-Thrustmaster_T-Pendular-Rudder-event-";
 
 // Handle signals
 static volatile bool run = true;
@@ -21,52 +17,36 @@ void signalHandler(int dummy) {
 }
 
 // Function to find the correct Thrustmaster T-Pendular Rudder device path
-// Return status code, zero if good.
-int findRealTprDevicePath(/*output*/char* realTprDevicePath) {
-	// We need to look in the /dev/input/by-id folder for entries.
-	// Open it, and get the names of the entries to check.
-	DIR *dir = opendir(SEARCH_PATH);
-	if (dir == NULL) 
-	{
-		// Could not open directory, search fails.
-		fprintf(stderr, "Failed to open searhc path %s: %d %s\n", SEARCH_PATH, errno, strerror(errno));
-		return -1;
-	}
-
+// Return an empty string if nothing found.
+std::string findRealTprDevicePath() {
+	// We need to look in the SEARCH_PATH folder for entries.
 	// For each entry in trhe directory
-	struct dirent *entry;
-	int count = 0;
-	while((entry = readdir(dir))) {
-		// Get the file name into a convenience pointer
-		const char* filename = entry->d_name;
-	
+	std::string result;
+	for (const auto& entry : std::filesystem::directory_iterator(SEARCH_PATH)) {
+		// Get each element
+		std::filesystem::path path = entry.path();
+		std::string pathAsString = path.string();
+		
 		// Check for pattern match
-		if(strstr(filename, SEARCH_PATTERN) == NULL) {
+		if(pathAsString.find(SEARCH_PATTERN) == std::string::npos) {
 			// No match, skip.
 			continue;
 		}
-
-		// We have a match, keep it and write it out to the console as logging
-		count++;
-		snprintf(realTprDevicePath, PATH_SIZE, "%s/%s", SEARCH_PATH, filename);
-		printf("Found %s\n", filename);
-	}
-
-	// Close the path.
-	closedir(dir);
-
-	// Do a sanity check
-	if (count == 0) {
-		fprintf(stderr, "No Thrustmaster T-Pendular-Rudder devices detected.\n");
-		return -2;
-	} else if (count > 1) {
-		fprintf(stderr, "Too many Thrustmaster T-Pendular-Rudder devices detected.\n");
-		memset(realTprDevicePath, 0, PATH_SIZE);
-		return -3;
+		
+		// We have a match!
+		// We only want to use the first answer we find
+		if (result.size() == 0) {
+			// Keep this one
+			result = pathAsString;
+			std::cout << "Found: " << pathAsString << std::endl;
+		} else {
+			// Log out others
+			std::cout << "Also found: " << pathAsString << std::endl;
+		}
 	}
 	
 	// Success
-	return 0;
+	return result;
 }
 
 int main(int argc, char** argv) {
@@ -77,25 +57,28 @@ int main(int argc, char** argv) {
 	signal(SIGKILL, signalHandler);
 	
 	// Work out the TPR device path
-	static char realTprDevicePath[PATH_SIZE];
-	memset(realTprDevicePath, 0, PATH_SIZE);
+	std::string realTprDevicePath;
 	
 	// If the user passed an argument, use the first argument as the path.
 	if(argc > 1) {
 		// Copy it in.
-		strncpy(realTprDevicePath, argv[1], PATH_SIZE);
+		realTprDevicePath = argv[1];
 	} else {
 		// Try and find a TPR device path by searching for it.
-		if(findRealTprDevicePath(realTprDevicePath) != 0) {
-			return -1;
-		}
+		realTprDevicePath = findRealTprDevicePath();
+	}
+	
+	// Do a sanity check
+	if (realTprDevicePath.size() == 0) {
+		std::cerr << "No Thrustmaster T-Pendular-Rudder devices supplied as an argument, or discovered in " << SEARCH_PATH << std::endl;
+		return -1;
 	}
 
 	// Get real TPR device
-	int realTprFd = open(realTprDevicePath, O_RDONLY|O_NONBLOCK);
+	int realTprFd = open(realTprDevicePath.c_str(), O_RDONLY|O_NONBLOCK);
 	if (realTprFd < 0)
 	{
-		fprintf(stderr, "Could not open Thrustmaster T-Pendular-Rudder device \"%s\": %d %s\n", realTprDevicePath, errno, strerror(errno));
+		std::cerr << "Could not open Thrustmaster T-Pendular-Rudder device " << realTprDevicePath << ":" << errno << " " << strerror(errno) << std::endl;
 		return -2;
 	}
 	
@@ -104,7 +87,7 @@ int main(int argc, char** argv) {
 	int rc = libevdev_new_from_fd(realTprFd, &realTprDevice);
 	if (rc < 0)
 	{
-		fprintf(stderr, "Could not get Thrustmaster T-Pendular-Rudder device \"%s\": %d %s\n", realTprDevicePath, -rc, strerror(-rc));
+		std::cerr << "Could not get Thrustmaster T-Pendular-Rudder device " << realTprDevicePath << ":" << -rc << " " << strerror(-rc) << std::endl;
 		close(realTprFd);
 		return -3;
 	}
@@ -134,7 +117,7 @@ int main(int argc, char** argv) {
 	rc = libevdev_uinput_create_from_device(virtualTprDevice, LIBEVDEV_UINPUT_OPEN_MANAGED, &virtualTprUinputDevice);
 	if (rc < 0)
 	{
-		fprintf(stderr, "Could not create uinput Thrustmaster T-Pendular-Rudder device \"%s\": %d %s\n", realTprDevicePath, -rc, strerror(-rc));
+		std::cerr << "Could not create uinput Thrustmaster T-Pendular-Rudder device " << realTprDevicePath << ":" << -rc << " " << strerror(-rc) << std::endl;
 		libevdev_free(realTprDevice);
 		libevdev_free(virtualTprDevice);
 		close(realTprFd);
@@ -143,7 +126,7 @@ int main(int argc, char** argv) {
 	}
 
 	// Run loop until the controller is unplugged.
-	printf("Running virtual Thrustmaster T-Pendular-Rudder %s\n", libevdev_uinput_get_devnode(virtualTprUinputDevice));
+	std::cout << "Running virtual Thrustmaster T-Pendular-Rudder " << libevdev_uinput_get_devnode(virtualTprUinputDevice) << std::endl;
 	while (run)
 	{
 		// Read from TPR
@@ -175,6 +158,7 @@ int main(int argc, char** argv) {
 	libevdev_free(realTprDevice);
 	libevdev_free(virtualTprDevice);
 	close(realTprFd);
-	printf("Exiting.\n");
+	std::cout << "Exiting." << std::endl;
 	return 0;
 }
+
