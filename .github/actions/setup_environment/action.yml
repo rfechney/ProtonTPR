@@ -1,0 +1,17 @@
+name: Setup Environment
+
+inputs:
+  package_manager:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libevdev-dev
