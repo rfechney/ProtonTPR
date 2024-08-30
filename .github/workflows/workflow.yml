@@ -22,6 +22,9 @@ jobs:
             package_manager: apt
     runs-on: ${{ matrix.os['runs-on'] }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Setup Environment
         uses: ./.github/actions/setup-environment
         with:
