@@ -33,7 +33,7 @@ jobs:
       - name: Compile C++ code
         shell: bash
         run: |
-          g++ -o protontpr protontpr.cpp -levdev
+          g++ -o protontpr src/protontpr.cpp -levdev
           echo "Compilation finished successfully."
 
       # - name: Run tests (optional)
