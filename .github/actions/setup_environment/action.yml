@@ -13,7 +13,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg-dev gnu-tar
+        sudo apt-get install -y dpkg-dev
 
     - name: Download libevdev-dev package
       shell: bash
