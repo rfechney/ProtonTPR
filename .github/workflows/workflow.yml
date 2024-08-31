@@ -4,7 +4,6 @@ on:
   - push
   - pull_request
 
-
 jobs:
   build:
 
@@ -33,7 +32,7 @@ jobs:
       - name: Compile C++ code
         shell: bash
         run: |
-          g++ -o protontpr src/protontpr.cpp -levdev
+          g++ -o protontpr src/protontpr.cpp -I/usr/local/include/libevdev-1.0 -L/usr/local/lib -levdev
           echo "Compilation finished successfully."
 
       # - name: Run tests (optional)
@@ -44,5 +43,5 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: protontpr-binary-${{ matrix.os }}
+          name: protontpr-binary-${{ matrix.os.name }}
           path: ./protontpr

@@ -8,8 +8,29 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install dependencies
+    - name: Install dependencies for extraction
+      if: input.package_manager == 'apt'
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libevdev-dev
+        sudo apt-get install -y dpkg-dev gnu-tar
+
+    - name: Download libevdev-dev package
+      shell: bash
+      run: |
+        mkdir -p libevdev_pkg
+        cd libevdev_pkg
+        apt-get download libevdev-dev
+
+    - name: Extract libevdev-dev package
+      shell: bash
+      run: |
+        cd libevdev_pkg
+        dpkg-deb -x *.deb extracted_libevdev
+
+    - name: Move files to appropriate directories
+      shell: bash
+      run: |
+        sudo cp -r libevdev_pkg/extracted_libevdev/usr/include/libevdev-1.0/* /usr/local/include/
+        sudo cp libevdev_pkg/extracted_libevdev/usr/lib/x86_64-linux-gnu/* /usr/local/lib/
+        sudo ldconfig
