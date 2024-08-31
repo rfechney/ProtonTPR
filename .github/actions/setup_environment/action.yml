@@ -32,5 +32,5 @@ runs:
       shell: bash
       run: |
         sudo cp -r libevdev_pkg/extracted_libevdev/usr/include/libevdev-1.0/* /usr/local/include/
-        sudo cp libevdev_pkg/extracted_libevdev/usr/lib/* /lib/
+        sudo cp -r libevdev_pkg/extracted_libevdev/usr/lib/* /lib/
         sudo ldconfig
