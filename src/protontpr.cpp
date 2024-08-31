@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h> // For close and usleep
 #include <libevdev/libevdev.h>
 #include <libevdev/libevdev-uinput.h>
 

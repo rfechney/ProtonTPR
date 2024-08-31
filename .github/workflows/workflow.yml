@@ -1,0 +1,47 @@
+name: Build and Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu-beta
+            runs-on: ubuntu-24.04
+            package_manager: apt
+          - name: ubuntu-latest
+            runs-on: ubuntu-latest
+            package_manager: apt
+          - name: ubuntu-old
+            runs-on: ubuntu-20.04
+            package_manager: apt
+    runs-on: ${{ matrix.os['runs-on'] }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup_environment
+        with:
+          package_manager: ${{ matrix.os.package_manager }}
+
+      - name: Compile C++ code
+        shell: bash
+        run: |
+          g++ -std=c++17 -o protontpr src/protontpr.cpp -I/usr/local/include/libevdev-1.0 -L/lib -levdev
+          echo "Compilation finished successfully."
+
+      # - name: Run tests (optional)
+      #   run: |
+      #     ./protontpr --test
+      #     echo "Tests completed successfully."
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: protontpr-binary-${{ matrix.os.name }}
+          path: ./protontpr
