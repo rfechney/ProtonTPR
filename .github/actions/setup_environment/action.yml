@@ -9,7 +9,7 @@ runs:
   using: "composite"
   steps:
     - name: Install dependencies for extraction
-      if: input.package_manager == 'apt'
+      if: inputs.package_manager == 'apt'
       shell: bash
       run: |
         sudo apt-get update
