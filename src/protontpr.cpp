@@ -218,6 +218,12 @@ int main(int argc, char** argv) {
 				// Emit successful event to virtual tpr
 				libevdev_uinput_write_event(virtualTprUinputDevice, realEvent.type, realEvent.code, realEvent.value);
 			}
+			
+			// If the return code is negative, we can assume the real device is gone.
+			if (rc < 0) {
+				std::cerr << "In use Thrustmaster T-Pendular-Rudder device " << realTprDevicePath << " returns " << rc << " on read, resetting." << std::endl;
+				closeRealTPRDevice(realTprFd, realTprDevice);
+			}
 		}
 	
 		// Sleep 1ms if there is nothing to do
