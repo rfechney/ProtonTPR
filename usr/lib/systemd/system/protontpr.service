@@ -8,6 +8,8 @@ Restart=always
 RestartSec=1
 ExecStart=/usr/bin/protontpr
 ExecStop=/usr/bin/killall protontpr
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
