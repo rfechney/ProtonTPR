@@ -32,7 +32,7 @@ jobs:
       - name: Compile C++ code
         shell: bash
         run: |
-          g++ -std=c++17 -o protontpr src/protontpr.cpp -I/usr/local/include/libevdev-1.0 -L/lib -levdev -ludev
+          g++ -std=c++17 -o ProtonTPR src/ProtonTPR.cpp -I/usr/local/include/libevdev-1.0 -L/lib -levdev -ludev
           echo "Compilation finished successfully."
 
       - name: Upload build artifact
