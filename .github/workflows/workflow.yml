@@ -36,7 +36,7 @@ jobs:
           echo "Compilation finished successfully."
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ProtonTPR-binary-${{ matrix.os.name }}
           path: ./ProtonTPR
