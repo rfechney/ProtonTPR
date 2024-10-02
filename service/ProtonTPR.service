@@ -1,13 +1,13 @@
 [Unit]
-Description=Thrustmaster Proton TPR compatibility service
+Description=Thrustmaster TPR Linux compatibility service
 After=systemd-udevd.service
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/usr/bin/protontpr
-ExecStop=/usr/bin/killall protontpr
+ExecStart=/usr/bin/ProtonTPR 044f b68f
+ExecStop=/usr/bin/killall ProtonTPR
 StandardOutput=journal
 StandardError=journal
 

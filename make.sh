@@ -5,5 +5,6 @@ if [ ! -f /usr/include/libevdev-1.0/libevdev/libevdev.h ]; then
     exit -1
 fi
 
-# Build
-g++ -std=c++17 src/protontpr.cpp -I/usr/include/libevdev-1.0 -levdev -o protontpr
+# Build ProtonTPR
+g++ -std=c++17 -I /usr/include/libevdev-1.0 src/ProtonTPR.cpp -levdev -ludev -o ProtonTPR
+
