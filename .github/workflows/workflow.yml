@@ -32,16 +32,11 @@ jobs:
       - name: Compile C++ code
         shell: bash
         run: |
-          g++ -std=c++17 -o protontpr src/protontpr.cpp -I/usr/local/include/libevdev-1.0 -L/lib -levdev
+          g++ -std=c++17 -o protontpr src/protontpr.cpp -I/usr/local/include/libevdev-1.0 -L/lib -levdev -ludev
           echo "Compilation finished successfully."
-
-      # - name: Run tests (optional)
-      #   run: |
-      #     ./protontpr --test
-      #     echo "Tests completed successfully."
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: protontpr-binary-${{ matrix.os.name }}
-          path: ./protontpr
+          name: ProtonTPR-binary-${{ matrix.os.name }}
+          path: ./ProtonTPR
