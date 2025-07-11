@@ -220,14 +220,14 @@ int main(int argc, char** argv) {
 			}
 			
 			// If the return code is negative, we can assume the real device is gone.
-			if (rc < 0) {
+			if (rc < 0 && rc != -EAGAIN && rc != -EWOULDBLOCK) {
 				std::cerr << "In use Thrustmaster T-Pendular-Rudder device " << realTprDevicePath << " returns " << rc << " on read, resetting." << std::endl;
 				closeRealTPRDevice(realTprFd, realTprDevice);
 			}
 		}
 	
 		// Sleep 1ms if there is nothing to do
-		if (rc == -EAGAIN) {
+		if (rc == -EAGAIN || rc == -EWOULDBLOCK) {
 			usleep(1000);
 		}
 	}
